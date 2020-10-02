@@ -43,12 +43,15 @@ const ws = new WorkflowStep("date_and_time", {
 
     await update({ outputs });
   },
-  execute: async ({ step, complete, fail }) => {
+  execute: async ({ step, complete, fail, client }) => {
     
     try {
+
+      console.log(client);
+
         let now = dayjs();
         var currentTimestamp = { date: now.format("dddd, MMMM D, YYYY - HH:mm:ss") };
-        // TODO: Get user's locale
+        // TODO: Get user's locale - this won't work. What if there is no user? Maybe they should select a TZ in the config.
         // TODO: Set timestamp to user's local time
         const outputs = currentTimestamp;
         console.log(outputs);
