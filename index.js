@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 var dayjs = require('dayjs')
+var utc = require('dayjs/plugin/utc')
+dayjs.extend(utc)
 
 const { App, WorkflowStep } = require("@slack/bolt");
 
@@ -22,7 +24,59 @@ const ws = new WorkflowStep("date_and_time", {
         text: {
           type: "plain_text",
           text:
-            "This is a simple step that will output date and time as a variable. These are especially handy when writing values to a spreadsheet.",
+            "This is a simple step that will output the date and time that the step is executed as a variable. These are especially handy when writing values to a spreadsheet.",
+          emoji: true
+        }
+      },
+      {
+        type: "input",
+        block_id: "tz_select",
+        element: {
+          type: "static_select",
+          action_id: "tz_selection",
+          placeholder: {
+            type: "plain_text",
+            text: "Select a timezone",
+            emoji: true
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "PST - Pacific Standard Time - UTC-8",
+                emoji: true
+              },
+              value: "5"
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "MST - Mountain Standard Time - UTC-7",
+                emoji: true
+              },
+              value: "6"
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "CST - Central Standard Time - UTC-6",
+                emoji: true
+              },
+              value: "7"
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "EST - Eastern Standard Time - UTC-5",
+                emoji: true
+              },
+              value: "8"
+            }
+          ]
+        },
+        label: {
+          type: "plain_text",
+          text: "Select your timezone",
           emoji: true
         }
       }
@@ -33,6 +87,16 @@ const ws = new WorkflowStep("date_and_time", {
   save: async ({ ack, step, update, view }) => {
     await ack();
 
+    const {
+      tz_select
+    } = view.state.values;
+
+    const tz = tz_select.tz_selection.selected_option.value;
+
+    const inputs = {
+      tz: { value: tz }
+    }
+
     const outputs = [
         {
             type: "text",
@@ -41,20 +105,16 @@ const ws = new WorkflowStep("date_and_time", {
         }
     ];
 
-    await update({ outputs });
+    await update({ inputs, outputs });
   },
-  execute: async ({ step, complete, fail, client }) => {
+  execute: async ({ step, complete, fail }) => {
     
     try {
+      const { tz } = step.inputs;
 
-      console.log(client);
+        var currentTimestamp = dayjs().utcOffset(step.inputs.tz.value).format("dddd, MMMM D, YYYY - HH:mm:ss");
+        const outputs = { date: currentTimestamp }
 
-        let now = dayjs();
-        var currentTimestamp = { date: now.format("dddd, MMMM D, YYYY - HH:mm:ss") };
-        // TODO: Get user's locale - this won't work. What if there is no user? Maybe they should select a TZ in the config.
-        // TODO: Set timestamp to user's local time
-        const outputs = currentTimestamp;
-        console.log(outputs);
         await complete({ outputs });
 
     } catch (e) {
