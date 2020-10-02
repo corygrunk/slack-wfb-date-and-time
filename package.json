@@ -1,0 +1,17 @@
+{
+  "name": "slack-wfb-date-and-time",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Get date and time as a variable for Slack Workflow Builder steps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Cory Grunkemeyer",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^2.4.1",
+    "dotenv": "^8.2.0"
+  }
+}
