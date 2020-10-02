@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+var dayjs = require('dayjs')
+
 const { App, WorkflowStep } = require("@slack/bolt");
 
 const app = new App({
@@ -9,6 +11,7 @@ const app = new App({
 
 
 const ws = new WorkflowStep("date_and_time", {
+
   edit: async ({ ack, step, configure }) => {
     await ack();
 
@@ -73,7 +76,8 @@ const ws = new WorkflowStep("date_and_time", {
   },
   execute: async ({ step, complete, fail,  }) => {
     try {
-        var currentTimestamp = { date: Date.now() };
+        let now = dayjs();
+        var currentTimestamp = { date: now.format("dddd, MMMM D, YYYY - HH:mm:ss") };
         const outputs = currentTimestamp;
         
       await complete({ outputs });
@@ -93,4 +97,5 @@ app.step(ws);
   await app.start(port);
 
   console.log(`⚡️ Bolt app is running on port ${port}!`);
+
 })();
